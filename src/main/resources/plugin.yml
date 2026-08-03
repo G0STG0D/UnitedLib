@@ -1,7 +1,8 @@
 name: UnitedLib
-version: 0.1
+version: ${project.version}
 main: org.unitedlands.UnitedLib
 api-version: 1.21
 description: Utility library for functionalities shared by United Lands plugins.
 author: Theriel_
+contributors: [ G0STG0D ]
 softdepend: [ ItemsAdder, Nexo, MythicMobs ]
