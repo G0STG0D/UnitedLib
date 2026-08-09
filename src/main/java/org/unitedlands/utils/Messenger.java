@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.bukkit.plugin.java.JavaPlugin;
 import org.unitedlands.UnitedLib;
 
 import net.kyori.adventure.audience.Audience;
@@ -179,6 +180,21 @@ public class Messenger {
     public static void sendMessage(Collection<? extends Audience> targets, List<String> lines,
             Map<String, String> replacements, String prefix) {
         send(targets, lines, replacements, prefix);
+    }
+
+    // -------------------------------------------------------------------------------------------
+    // Utilities
+    // -------------------------------------------------------------------------------------------
+
+    @SuppressWarnings("DataFlowIssue")
+    public static String getUnitedPrefix(JavaPlugin plugin) {
+        var config = UnitedLib.getInstance().getConfig();
+
+        var name = plugin.getName().replace("United", "");
+        if (name.equalsIgnoreCase("Lands"))
+            return config.getString("messages.prefix-ul");;
+
+        return config.getString("messages.prefix").replace("{name}", name);
     }
 
 }

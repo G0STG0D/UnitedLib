@@ -6,7 +6,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import org.unitedlands.interfaces.ICommandHandler;
 import org.unitedlands.interfaces.IMessageProvider;
+import org.unitedlands.annotations.UnitedCommand;
 
+/**
+ * @deprecated Use @{@link UnitedCommand} instead.
+ */
+@Deprecated(since = "2.0", forRemoval = true)
 public abstract class BaseCommandHandler<P extends Plugin>  implements ICommandHandler {
 
     protected final P plugin;

@@ -1,6 +1,5 @@
 package org.unitedlands.utils;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,8 +9,8 @@ public class Formatter {
     public static String formatDuration(long millis) {
         long seconds = millis / 1000 % 60;
         long minutes = millis / (1000 * 60) % 60;
-        long hours = millis / (1000 * 60 * 60) % 24;
-        long days = millis / (1000 * 60 * 60 * 24);
+        long hours   = millis / (1000 * 60 * 60) % 24;
+        long days    = millis / (1000 * 60 * 60 * 24);
 
         StringBuilder sb = new StringBuilder();
         if (days > 0)
@@ -26,7 +25,7 @@ public class Formatter {
     }
 
     public static List<String> getSortedCompletions(String input, List<String> options) {
-        List<String> completions = Arrays.asList("");
+        List<String> completions = List.of("");
         if (options != null) {
             completions = options.stream().filter(s -> s.toLowerCase().startsWith(input.toLowerCase()))
                     .collect(Collectors.toList());

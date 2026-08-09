@@ -10,6 +10,8 @@ import org.unitedlands.factories.items.VanillaItemFactory;
 import org.unitedlands.factories.mobs.IMobFactory;
 import org.unitedlands.factories.mobs.MythicMobFactory;
 import org.unitedlands.factories.mobs.VanillaMobFactory;
+import org.unitedlands.menu.UnitedMenuListener;
+import org.unitedlands.registrars.UnitedLifecycleListener;
 import org.unitedlands.utils.Logger;
 
 public class UnitedLib extends JavaPlugin {
@@ -27,10 +29,10 @@ public class UnitedLib extends JavaPlugin {
     public void onEnable() {
 
         saveDefaultConfig();
-
         loadFactories();
+        loadListeners();
 
-        getLogger().info("UnitedLib initialized.");
+        Logger.log("UnitedLib initialized.");
 
     }
 
@@ -59,6 +61,11 @@ public class UnitedLib extends JavaPlugin {
             mobFactory = new VanillaMobFactory();
         }
 
+    }
+
+    private void loadListeners() {
+        Bukkit.getPluginManager().registerEvents(new UnitedLifecycleListener(), this);
+        Bukkit.getPluginManager().registerEvents(new UnitedMenuListener(), this);
     }
 
     public static UnitedLib getInstance() {

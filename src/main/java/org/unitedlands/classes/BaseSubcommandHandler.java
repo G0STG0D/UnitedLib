@@ -10,7 +10,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import org.unitedlands.interfaces.ICommandHandler;
 import org.unitedlands.interfaces.IMessageProvider;
+import org.unitedlands.annotations.UnitedSubCommand;
 
+/**
+ * @deprecated Use @{@link UnitedSubCommand} instead.
+ */
+@Deprecated(since = "2.0", forRemoval = true)
 public abstract class BaseSubcommandHandler<P extends Plugin> extends BaseCommandHandler<P> {
 
     protected final Map<String, ICommandHandler> subHandlers = new HashMap<>();

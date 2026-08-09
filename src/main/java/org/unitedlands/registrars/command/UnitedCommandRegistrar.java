@@ -1,0 +1,115 @@
+package org.unitedlands.registrars.command;
+
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.jspecify.annotations.NonNull;
+import org.unitedlands.annotations.UnitedCommand;
+import org.unitedlands.annotations.UnitedSubCommand;
+import org.unitedlands.utils.Logger;
+
+import java.io.File;
+import java.lang.reflect.Modifier;
+import java.util.*;
+import java.util.jar.JarFile;
+
+public class UnitedCommandRegistrar {
+
+    private static final Map<JavaPlugin, List<UnitedCommandRouting>> registered = new HashMap<>();
+
+    public static void registerAll(JavaPlugin plugin) {
+        var nodes = new LinkedHashMap<Class<?>, UnitedCommandNode>();
+
+        try {
+            var url = plugin.getClass().getProtectionDomain().getCodeSource().getLocation();
+
+            try (var jar = new JarFile(new File(url.toURI()))) {
+                jar.stream()
+                        .filter(entry  -> entry.getName().endsWith(".class") && !entry.getName().contains("$"))
+                        .forEach(entry -> collectNode(plugin, entry.getName(), nodes));
+            }
+        } catch(Exception e) {
+            Logger.logError("Command registration failed for package: " + plugin.getClass().getPackageName());
+            Logger.logError(e.getMessage());
+        }
+
+        var roots      = buildTree(nodes);
+        var commandMap = Bukkit.getServer().getCommandMap();
+        var prefix     = plugin.getName().toLowerCase();
+
+        roots.forEach(root -> {
+            var cmd = new UnitedCommandRouting(root, plugin);
+            commandMap.register(prefix, cmd);
+            registered.computeIfAbsent(plugin, k -> new ArrayList<>()).add(cmd);
+        });
+    }
+
+    private static void collectNode(JavaPlugin plugin, String entryName, Map<Class<?>, UnitedCommandNode> nodes) {
+        var className = entryName.replace('/', '.').replace(".class", "");
+
+        try {
+            var clazz = Class.forName(className, true, plugin.getClass().getClassLoader());
+
+            var isCmd = clazz.isAnnotationPresent(UnitedCommand.class);
+            var isSub = clazz.isAnnotationPresent(UnitedSubCommand.class);
+            if (!isCmd && !isSub)
+                return;
+
+            if (!UnitedCommandExecutor.class.isAssignableFrom(clazz) || clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {
+                Logger.logError("Command has to implement UnitedCommandExecutor: " + className);
+                return;
+            }
+
+            var executor = (UnitedCommandExecutor) clazz.getDeclaredConstructor().newInstance();
+            var cmdNode  = getUnitedCommandNode(isCmd, clazz, executor);
+
+            nodes.put(clazz, cmdNode);
+        } catch(Exception e) {
+            Logger.logError("Could not load command: " + className);
+            Logger.logError(e.getMessage());
+        }
+    }
+
+    private static @NonNull UnitedCommandNode getUnitedCommandNode(boolean isCmd, Class<?> clazz, UnitedCommandExecutor executor) {
+        UnitedCommandNode node;
+
+        if (isCmd) {
+            var ann = clazz.getAnnotation(UnitedCommand.class);
+            node = new UnitedCommandNode(ann.name(), ann.aliases(), ann.description(), ann.usage(), ann.permission(), ann.playerOnly(), executor);
+        } else {
+            var ann = clazz.getAnnotation(UnitedSubCommand.class);
+            node = new UnitedCommandNode(ann.name(), ann.aliases(), ann.description(), ann.usage(), ann.permission(), ann.playerOnly(), ann.catchAll(), executor);
+        }
+
+        return node;
+    }
+
+    private static List<UnitedCommandNode> buildTree(Map<Class<?>, UnitedCommandNode> nodes) {
+        var roots = new ArrayList<UnitedCommandNode>();
+
+        nodes.forEach((clazz, node) -> {
+            if (clazz.isAnnotationPresent(UnitedCommand.class)) {
+                roots.add(node);
+            } else {
+                var parent = nodes.get(clazz.getAnnotation(UnitedSubCommand.class).parent());
+                if (parent == null) {
+                    Logger.logError("Parent command not found for subcommand: " + clazz.getName());
+                    return;
+                }
+
+                parent.addChild(node);
+            }
+        });
+
+        return roots;
+    }
+
+    public static void unregisterAll(JavaPlugin plugin) {
+        var commands = registered.remove(plugin);
+        if (commands == null)
+            return;
+
+        var commandMap = Bukkit.getServer().getCommandMap();
+        commands.forEach(cmd -> cmd.unregister(commandMap));
+    }
+
+}
