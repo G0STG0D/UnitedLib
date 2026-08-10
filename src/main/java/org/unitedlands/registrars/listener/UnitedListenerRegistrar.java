@@ -12,6 +12,7 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.jar.JarFile;
 
+@SuppressWarnings("DuplicatedCode")
 public class UnitedListenerRegistrar {
 
     private static final Map<JavaPlugin, List<Listener>> registered = new HashMap<>();
@@ -22,7 +23,9 @@ public class UnitedListenerRegistrar {
 
             try (var jar = new JarFile(new File(url.toURI()))) {
                 jar.stream()
-                        .filter(entry  -> entry.getName().endsWith(".class") && !entry.getName().contains("$"))
+                        .filter(entry  -> entry.getName().endsWith(".class")
+                                && !entry.getName().contains("$")
+                                && !entry.getName().startsWith("META-INF/"))
                         .forEach(entry -> tryRegister(plugin, entry.getName()));
             }
         } catch (Exception e) {
@@ -52,7 +55,7 @@ public class UnitedListenerRegistrar {
             Bukkit.getPluginManager().registerEvents(instance, plugin);
             registered.computeIfAbsent(plugin, k -> new ArrayList<>()).add(instance);
 
-        } catch (Exception e) {
+        } catch (Throwable e) {
             Logger.logError("Could not register listener: " + className);
             Logger.logError(e.getMessage());
         }

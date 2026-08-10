@@ -24,10 +24,12 @@ public class UnitedCommandRegistrar {
 
             try (var jar = new JarFile(new File(url.toURI()))) {
                 jar.stream()
-                        .filter(entry  -> entry.getName().endsWith(".class") && !entry.getName().contains("$"))
+                        .filter(entry -> entry.getName().endsWith(".class")
+                                && !entry.getName().contains("$")
+                                && !entry.getName().startsWith("META-INF/"))
                         .forEach(entry -> collectNode(plugin, entry.getName(), nodes));
             }
-        } catch(Exception e) {
+        } catch(Throwable e) {
             Logger.logError("Command registration failed for package: " + plugin.getClass().getPackageName());
             Logger.logError(e.getMessage());
         }
