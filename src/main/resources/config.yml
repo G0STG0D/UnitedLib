@@ -1,6 +1,6 @@
 messages:
-  prefix-ul: "<bold><white>U</white><red>L</red> <dark_gray>»</dark_gray></bold> "
-  prefix: "<bold><white>U</white><red>L</red> <gray>{name}</gray> <dark_gray>»</dark_gray></bold> "
+  prefix-ul: "<bold><red>U</red><white>L</white> <dark_gray>»</dark_gray></bold> "
+  prefix: "<bold><red>U</red><white>L</white> <gray>{name}</gray> <dark_gray>»</dark_gray></bold> "
   no-permission: "<red>You don't have permission to use this command.</red>"
   player-only: "<red>This command can only be used by players.</red>"
   usage: "<gray><i>Usage:</i> {usage}</gray>"

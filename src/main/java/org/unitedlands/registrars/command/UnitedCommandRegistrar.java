@@ -15,6 +15,7 @@ import java.util.jar.JarFile;
 public class UnitedCommandRegistrar {
 
     private static final Map<JavaPlugin, List<UnitedCommandRouting>> registered = new HashMap<>();
+    private static final Map<UnitedCommandExecutor, JavaPlugin> executorPlugins = new HashMap<>();
 
     public static void registerAll(JavaPlugin plugin) {
         var nodes = new LinkedHashMap<Class<?>, UnitedCommandNode>();
@@ -71,6 +72,7 @@ public class UnitedCommandRegistrar {
             var cmdNode  = getUnitedCommandNode(isCmd, clazz, executor);
 
             nodes.put(clazz, cmdNode);
+            executorPlugins.put(executor, plugin);
         } catch(Exception e) {
             Logger.logError("Could not load command: " + className);
             Logger.logError(e.getMessage());
@@ -118,6 +120,12 @@ public class UnitedCommandRegistrar {
 
         var commandMap = Bukkit.getServer().getCommandMap();
         commands.forEach(cmd -> cmd.unregister(commandMap));
+
+        executorPlugins.entrySet().removeIf(entry -> entry.getValue() == plugin);
+    }
+
+    public static JavaPlugin getPluginForExecutor(UnitedCommandExecutor executor) {
+        return executorPlugins.get(executor);
     }
 
 }

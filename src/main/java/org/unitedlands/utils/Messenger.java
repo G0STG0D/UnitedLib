@@ -13,6 +13,9 @@ import org.unitedlands.UnitedLib;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.unitedlands.annotations.UnitedCommand;
+import org.unitedlands.annotations.UnitedSubCommand;
+import org.unitedlands.registrars.command.UnitedCommandExecutor;
 
 public class Messenger {
 
@@ -128,6 +131,24 @@ public class Messenger {
     public static void sendMessage(Audience target, String message, Map<String, String> replacements, String prefix) {
         Objects.requireNonNull(message, "message");
         send(Collections.singletonList(target), Collections.singletonList(message), replacements, prefix);
+    }
+
+    public static void sendUsage(Audience target, UnitedCommandExecutor command, JavaPlugin plugin) {
+        var clazz = command.getClass();
+        var usage = "";
+
+        if (clazz.isAnnotationPresent(UnitedCommand.class))
+            usage = clazz.getAnnotation(UnitedCommand.class).usage();
+        else if (clazz.isAnnotationPresent(UnitedSubCommand.class))
+            usage = clazz.getAnnotation(UnitedSubCommand.class).usage();
+
+        if (usage.isEmpty())
+            return;
+
+        var config = UnitedLib.getInstance().getConfig();
+        var prefix = getUnitedPrefix(plugin);
+
+        sendMessage(target, config.getString("messages.usage"), Map.of("usage", usage), prefix);
     }
 
     // -------------------------------------------------------------------------------------------
