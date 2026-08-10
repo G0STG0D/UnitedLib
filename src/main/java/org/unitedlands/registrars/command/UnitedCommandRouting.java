@@ -101,7 +101,9 @@ class UnitedCommandRouting extends Command {
 
             var custom = node.executor.handleTab(sender, Arrays.copyOfRange(args, depth, args.length));
             if (custom != null)
-                completions.addAll(custom);
+                custom.stream()
+                        .filter(sug -> sug.toLowerCase().startsWith(current))
+                        .forEach(completions::add);
 
             return completions;
         }
