@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface UnitedSubCommand {
 
-    String name();
+    String name() default "";
 
     Class<?> parent();
 
@@ -24,5 +24,9 @@ public @interface UnitedSubCommand {
     boolean playerOnly() default false;
 
     boolean catchAll() default false;
+
+    int cooldown() default 0;
+
+    String cooldownPermission() default "united.lands.admin";
 
 }

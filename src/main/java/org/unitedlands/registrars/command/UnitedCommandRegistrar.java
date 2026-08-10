@@ -84,10 +84,12 @@ public class UnitedCommandRegistrar {
 
         if (isCmd) {
             var ann = clazz.getAnnotation(UnitedCommand.class);
-            node = new UnitedCommandNode(ann.name(), ann.aliases(), ann.description(), ann.usage(), ann.permission(), ann.playerOnly(), executor);
+            node = new UnitedCommandNode(ann.name(), ann.aliases(), ann.description(), ann.usage(), ann.permission(),
+                    ann.playerOnly(), ann.cooldown(), ann.cooldownPermission(), executor);
         } else {
             var ann = clazz.getAnnotation(UnitedSubCommand.class);
-            node = new UnitedCommandNode(ann.name(), ann.aliases(), ann.description(), ann.usage(), ann.permission(), ann.playerOnly(), ann.catchAll(), executor);
+            node = new UnitedCommandNode(ann.name(), ann.aliases(), ann.description(), ann.usage(), ann.permission(),
+                    ann.playerOnly(), ann.catchAll(), ann.cooldown(), ann.cooldownPermission(), executor);
         }
 
         return node;

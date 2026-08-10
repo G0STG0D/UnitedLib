@@ -23,7 +23,7 @@ class UnitedCommandRouting extends Command {
     UnitedCommandRouting(UnitedCommandNode root, JavaPlugin plugin) {
         super(root.name, root.description, root.usage, List.of(root.aliases));
 
-        this.root = root;
+        this.root   = root;
         this.prefix = Messenger.getUnitedPrefix(plugin);
 
         if (!root.permission.isEmpty())
@@ -44,8 +44,19 @@ class UnitedCommandRouting extends Command {
             return;
         }
 
-        if (node.playerOnly & !(sender instanceof Player)) {
+        if (node.playerOnly && !(sender instanceof Player)) {
             Messenger.sendMessage(sender, config.getString("messages.player-only"), null, prefix);
+            return;
+        }
+
+        if (node.cooldown > 0 && sender instanceof Player player && node.isOnCooldown(player.getUniqueId()) && !player.hasPermission(node.cooldownPermission)) {
+            Messenger.sendMessage(sender, config.getString("messages.cooldown"), Map.of("time", String.valueOf(node.remainingCooldown(player.getUniqueId()))), prefix);
+            return;
+        }
+
+        if (node.catchAll) {
+            applyCooldownIfNeeded(node, sender);
+            node.executor.handleCommand(sender, Arrays.copyOfRange(args, depth, args.length));
             return;
         }
 
@@ -72,6 +83,7 @@ class UnitedCommandRouting extends Command {
             return;
         }
 
+        applyCooldownIfNeeded(node, sender);
         node.executor.handleCommand(sender, Arrays.copyOfRange(args, depth, args.length));
     }
 
@@ -86,6 +98,17 @@ class UnitedCommandRouting extends Command {
 
         var current = args[depth].toLowerCase();
 
+        if (node.catchAll) {
+            var custom = node.executor.handleTab(sender, Arrays.copyOfRange(args, depth, args.length));
+            if (custom == null)
+                return List.of();
+
+            var typing = args[args.length - 1].toLowerCase();
+            return custom.stream()
+                    .filter(sug -> sug.toLowerCase().startsWith(typing))
+                    .toList();
+        }
+
         if (depth == args.length - 1) {
             var completions = node.childNames().stream()
                     .filter(name -> name.toLowerCase().startsWith(current))
@@ -95,7 +118,7 @@ class UnitedCommandRouting extends Command {
                 var suggestions = node.catchAllChild.executor.handleTab(sender, new String[]{ args[depth] });
                 if (suggestions != null)
                     suggestions.stream()
-                            .filter(suggestion -> suggestion.toLowerCase().startsWith(current))
+                            .filter(sug -> sug.toLowerCase().startsWith(current))
                             .forEach(completions::add);
             }
 
@@ -116,6 +139,11 @@ class UnitedCommandRouting extends Command {
             return routeTab(sender, alias, node.catchAllChild, args, depth);
 
         return node.executor.handleTab(sender, Arrays.copyOfRange(args, depth, args.length));
+    }
+
+    private void applyCooldownIfNeeded(UnitedCommandNode node, CommandSender sender) {
+        if (node.cooldown > 0 && sender instanceof Player player && !player.hasPermission(node.cooldownPermission))
+            node.applyCooldown(player.getUniqueId());
     }
 
 }

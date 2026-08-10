@@ -21,4 +21,8 @@ public @interface UnitedCommand {
 
     boolean playerOnly() default false;
 
+    int cooldown() default 0;
+
+    String cooldownPermission() default "united.lands.admin";
+
 }
