@@ -19,13 +19,14 @@ public class UnitedListenerRegistrar {
 
     public static void registerAll(JavaPlugin plugin) {
         try {
-            var url = plugin.getClass().getProtectionDomain().getCodeSource().getLocation();
+            var url  = plugin.getClass().getProtectionDomain().getCodeSource().getLocation();
+            var path = plugin.getClass().getPackageName().replace('.', '/') + '/';
 
             try (var jar = new JarFile(new File(url.toURI()))) {
                 jar.stream()
                         .filter(entry  -> entry.getName().endsWith(".class")
                                 && !entry.getName().contains("$")
-                                && !entry.getName().startsWith("META-INF/"))
+                                && entry.getName().startsWith(path))
                         .forEach(entry -> tryRegister(plugin, entry.getName()));
             }
         } catch (Exception e) {
@@ -37,14 +38,19 @@ public class UnitedListenerRegistrar {
 
     private static void tryRegister(JavaPlugin plugin, String entryName) {
         var className = entryName.replace('/', '.').replace(".class", "");
+        Class<?> clazz;
 
         try {
-            var clazz = Class.forName(className, true, plugin.getClass().getClassLoader());
+            clazz = Class.forName(className, false, plugin.getClass().getClassLoader());
+        } catch (Throwable e) {
+            return;
+        }
 
-            if (!clazz.isAnnotationPresent(UnitedListener.class)) return;
-            if (!Listener.class.isAssignableFrom(clazz)) return;
-            if (clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) return;
+        if (!clazz.isAnnotationPresent(UnitedListener.class)) return;
+        if (!Listener.class.isAssignableFrom(clazz)) return;
+        if (clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) return;
 
+        try {
             for (var dep : clazz.getAnnotation(UnitedListener.class).requirePlugins()) {
                 var depPlugin = Bukkit.getPluginManager().getPlugin(dep);
                 if (depPlugin == null || !depPlugin.isEnabled())

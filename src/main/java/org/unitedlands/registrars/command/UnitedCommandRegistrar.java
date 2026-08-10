@@ -20,13 +20,14 @@ public class UnitedCommandRegistrar {
         var nodes = new LinkedHashMap<Class<?>, UnitedCommandNode>();
 
         try {
-            var url = plugin.getClass().getProtectionDomain().getCodeSource().getLocation();
+            var url  = plugin.getClass().getProtectionDomain().getCodeSource().getLocation();
+            var path = plugin.getClass().getPackageName().replace('.', '/') + '/';
 
             try (var jar = new JarFile(new File(url.toURI()))) {
                 jar.stream()
                         .filter(entry -> entry.getName().endsWith(".class")
                                 && !entry.getName().contains("$")
-                                && !entry.getName().startsWith("META-INF/"))
+                                && entry.getName().startsWith(path))
                         .forEach(entry -> collectNode(plugin, entry.getName(), nodes));
             }
         } catch(Throwable e) {
@@ -47,20 +48,25 @@ public class UnitedCommandRegistrar {
 
     private static void collectNode(JavaPlugin plugin, String entryName, Map<Class<?>, UnitedCommandNode> nodes) {
         var className = entryName.replace('/', '.').replace(".class", "");
+        Class<?> clazz;
 
         try {
-            var clazz = Class.forName(className, true, plugin.getClass().getClassLoader());
+            clazz = Class.forName(className, false, plugin.getClass().getClassLoader());
+        } catch(Throwable e) {
+            return;
+        }
 
-            var isCmd = clazz.isAnnotationPresent(UnitedCommand.class);
-            var isSub = clazz.isAnnotationPresent(UnitedSubCommand.class);
-            if (!isCmd && !isSub)
-                return;
+        var isCmd = clazz.isAnnotationPresent(UnitedCommand.class);
+        var isSub = clazz.isAnnotationPresent(UnitedSubCommand.class);
+        if (!isCmd && !isSub)
+            return;
 
-            if (!UnitedCommandExecutor.class.isAssignableFrom(clazz) || clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {
-                Logger.logError("Command has to implement UnitedCommandExecutor: " + className);
-                return;
-            }
+        if (!UnitedCommandExecutor.class.isAssignableFrom(clazz) || clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {
+            Logger.logError("Command has to implement UnitedCommandExecutor: " + className);
+            return;
+        }
 
+        try {
             var executor = (UnitedCommandExecutor) clazz.getDeclaredConstructor().newInstance();
             var cmdNode  = getUnitedCommandNode(isCmd, clazz, executor);
 
