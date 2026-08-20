@@ -82,7 +82,7 @@ public class VanillaItemFactory extends BaseItemFactory {
     private String getVanillaDisplayName(ItemStack itemStack) {
         var type = itemStack.getType().toString();
         if (type.contains("POTION")) {
-            if (itemStack.getItemMeta() instanceof PotionMeta potionMeta) {
+            if (itemStack.getItemMeta() instanceof PotionMeta potionMeta && potionMeta.hasBasePotionType()) {
                 type = Formatter.formatReadable(type) + " (" +
                         Formatter.formatReadable(potionMeta.getBasePotionType().toString())
                         + ")";
@@ -136,8 +136,11 @@ public class VanillaItemFactory extends BaseItemFactory {
             return type;
         } else {
             if (itemStack.getItemMeta() instanceof PotionMeta potionMeta) {
-                var potionType = type + ":" + potionMeta.getBasePotionType().toString();
-                return potionType;
+                if (potionMeta.hasBasePotionType()) {
+                    return type + ":" + potionMeta.getBasePotionType().toString();
+                } else {
+                    return type;
+                }
             } else {
                 return type;
             }

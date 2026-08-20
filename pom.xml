@@ -2,18 +2,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.unitedlands</groupId>
-    <artifactId>UnitedLib</artifactId>
-    <version>2.0</version>
+  <groupId>org.unitedlands</groupId>
+  <artifactId>UnitedLib</artifactId>
+  <version>2.0</version>
 
-    <name>UnitedLib</name>
+  <name>UnitedLib</name>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>17</maven.compiler.release>
-    </properties>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.release>25</maven.compiler.release>
+  </properties>
 
     <repositories>
         <repository>
@@ -49,60 +49,60 @@
         </repository>
     </repositories>
 
-    <dependencies>
-        <dependency>
-            <groupId>io.papermc.paper</groupId>
-            <artifactId>paper-api</artifactId>
-            <version>1.21.11-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>dev.lone</groupId>
-            <artifactId>api-itemsadder</artifactId>
-            <version>4.0.10</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.lumine</groupId>
-            <artifactId>Mythic-Dist</artifactId>
-            <version>5.10.1</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.nexomc</groupId>
-            <artifactId>nexo</artifactId>
-            <version>1.18.0</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
+  <dependencies>
+    <dependency>
+      <groupId>io.papermc.paper</groupId>
+      <artifactId>paper-api</artifactId>
+      <version>[26.2.build,)</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>dev.lone</groupId>
+      <artifactId>api-itemsadder</artifactId>
+      <version>4.0.10</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.lumine</groupId>
+      <artifactId>Mythic-Dist</artifactId>
+      <version>5.10.1</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.nexomc</groupId>
+      <artifactId>nexo</artifactId>
+      <version>1.18.0</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
 
-    <profiles>
-        <profile>
-            <id>local-deploy</id>
-            <activation>
-                <file><exists>.local-deploy</exists></file>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-shade-plugin</artifactId>
-                        <version>3.2.4</version>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>shade</goal>
-                                </goals>
-                                <configuration>
-                                    <outputFile>../_server/plugins/${project.build.finalName}.jar</outputFile>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
+  <profiles>
+      <profile>
+          <id>local-deploy</id>
+          <activation>
+              <file><exists>.local-deploy</exists></file>
+          </activation>
+          <build>
+              <plugins>
+                  <plugin>
+                      <groupId>org.apache.maven.plugins</groupId>
+                      <artifactId>maven-shade-plugin</artifactId>
+                      <version>3.2.4</version>
+                      <executions>
+                          <execution>
+                              <phase>package</phase>
+                              <goals>
+                                  <goal>shade</goal>
+                              </goals>
+                              <configuration>
+                                  <outputFile>../_server/plugins/${project.build.finalName}.jar</outputFile>
+                              </configuration>
+                          </execution>
+                      </executions>
+                  </plugin>
+              </plugins>
+          </build>
+      </profile>
     </profiles>
 
     <build>
