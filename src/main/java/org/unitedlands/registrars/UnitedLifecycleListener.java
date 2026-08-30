@@ -6,6 +6,7 @@ import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.unitedlands.registrars.command.UnitedCommandRegistrar;
+import org.unitedlands.registrars.config.UnitedConfigRegistrar;
 import org.unitedlands.registrars.listener.UnitedListenerRegistrar;
 
 public class UnitedLifecycleListener implements Listener {
@@ -15,11 +16,12 @@ public class UnitedLifecycleListener implements Listener {
         if (!(event.getPlugin() instanceof JavaPlugin plugin))
             return;
 
-        var depencencies     = plugin.getPluginMeta().getPluginDependencies();
-        var softDependencies = plugin.getPluginMeta().getPluginSoftDependencies();
-        if (!depencencies.contains("UnitedLib") && !softDependencies.contains("UnitedLib"))
+        var deps     = plugin.getPluginMeta().getPluginDependencies();
+        var softDeps = plugin.getPluginMeta().getPluginSoftDependencies();
+        if (!deps.contains("UnitedLib") && !softDeps.contains("UnitedLib"))
             return;
 
+        UnitedConfigRegistrar.registerAll(plugin);
         UnitedListenerRegistrar.registerAll(plugin);
         UnitedCommandRegistrar.registerAll(plugin);
     }
@@ -29,6 +31,7 @@ public class UnitedLifecycleListener implements Listener {
         if (!(event.getPlugin() instanceof JavaPlugin plugin))
             return;
 
+        UnitedConfigRegistrar.unregisterAll(plugin);
         UnitedListenerRegistrar.unregisterAll(plugin);
         UnitedCommandRegistrar.unregisterAll(plugin);
     }
