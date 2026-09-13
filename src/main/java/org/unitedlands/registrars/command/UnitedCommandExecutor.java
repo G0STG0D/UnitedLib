@@ -1,7 +1,7 @@
 package org.unitedlands.registrars.command;
 
 import org.bukkit.command.CommandSender;
-import org.unitedlands.utils.Messenger;
+import org.unitedlands.utils.United;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ public interface UnitedCommandExecutor {
 
     default void sendUsage(CommandSender sender) {
         var plugin = UnitedCommandRegistrar.getPluginForExecutor(this);
-        Messenger.sendUsage(sender, this, plugin);
+        United.messenger().sendUsage(sender, this, plugin);
     }
 
 }

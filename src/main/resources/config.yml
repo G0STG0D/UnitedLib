@@ -1,7 +1,3 @@
 messages:
   prefix-ul: "<bold><red>U</red><white>L</white> <dark_gray>»</dark_gray></bold> "
   prefix: "<bold><red>U</red><white>L</white> <gray>{name}</gray> <dark_gray>»</dark_gray></bold> "
-  no-permission: "<red>You don't have permission to use this command.</red>"
-  player-only: "<red>This command can only be used by players.</red>"
-  usage: "<gray><i>Usage:</i> {usage}</gray>"
-  cooldown: "<red>You must wait <bold>{time}s</bold> before using this command again.</red>"

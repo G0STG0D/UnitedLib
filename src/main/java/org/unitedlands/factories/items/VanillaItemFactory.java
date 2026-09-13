@@ -13,8 +13,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionType;
-import org.unitedlands.utils.Formatter;
-import org.unitedlands.utils.Logger;
+import org.unitedlands.utils.United;
 
 public class VanillaItemFactory extends BaseItemFactory {
 
@@ -83,13 +82,13 @@ public class VanillaItemFactory extends BaseItemFactory {
         var type = itemStack.getType().toString();
         if (type.contains("POTION")) {
             if (itemStack.getItemMeta() instanceof PotionMeta potionMeta && potionMeta.hasBasePotionType()) {
-                type = Formatter.formatReadable(type) + " (" +
-                        Formatter.formatReadable(potionMeta.getBasePotionType().toString())
+                type = United.formatter().formatReadable(type) + " (" +
+                        United.formatter().formatReadable(potionMeta.getBasePotionType().toString())
                         + ")";
             }
             return type;
         }
-        return Formatter.formatReadable(itemStack.getType().toString());
+        return United.formatter().formatReadable(itemStack.getType().toString());
     }
 
     @Override
@@ -115,7 +114,7 @@ public class VanillaItemFactory extends BaseItemFactory {
     public void placeBlock(String id, Location location) {
         var material = Material.getMaterial(id);
         if (material == null) {
-            Logger.logError("Could not place block " + id);
+            United.logger().error("Could not place block " + id);
             return;
         }
         location.getBlock().setType(material);

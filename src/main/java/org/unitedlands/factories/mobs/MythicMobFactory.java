@@ -7,10 +7,10 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
-import org.unitedlands.utils.Logger;
 
 import io.lumine.mythic.bukkit.MythicBukkit;
 import io.lumine.mythic.core.mobs.ActiveMob;
+import org.unitedlands.utils.United;
 
 public class MythicMobFactory extends BaseMobFactory {
 
@@ -36,7 +36,7 @@ public class MythicMobFactory extends BaseMobFactory {
 
                 return entity.getUniqueId();
             } catch (Exception ex) {
-                Logger.logError("Error creating entity: " + ex.getMessage());
+                United.logger().error("Error creating entity: " + ex.getMessage());
             }
         }
         return null;
@@ -58,12 +58,12 @@ public class MythicMobFactory extends BaseMobFactory {
                 activeMythicMob.setOwnerUUID(owner.getUniqueId());
             }
             if (faction != null) {
-                Logger.log("Setting faction " + faction);
+                United.logger().info("Setting faction " + faction);
                 activeMythicMob.setFaction(faction);
             }
             return activeMythicMob.getUniqueId();
         } else {
-            Logger.logError("Unable to create custom mob " + mobType + ", vanilla mobs are not supported as minions.");
+            United.logger().error("Unable to create custom mob " + mobType + ", vanilla mobs are not supported as minions.");
         }
         return null;
     }

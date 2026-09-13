@@ -7,9 +7,9 @@ import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.unitedlands.utils.Logger;
 
 import net.kyori.adventure.text.Component;
+import org.unitedlands.utils.United;
 
 public class VanillaMobFactory extends BaseMobFactory {
 
@@ -29,23 +29,23 @@ public class VanillaMobFactory extends BaseMobFactory {
 
             return entity.getUniqueId();
         } catch (Exception ex) {
-            Logger.logError("Error creating entity: " + ex.getMessage());
+            United.logger().error("Error creating entity: " + ex.getMessage());
         }
         return null;
     }
 
     public UUID createMobAtLocation(String mobType, Location location, double level, String faction) {
-        Logger.logError("Unable to create mob " + mobType + " with faction, vanilla mobs can't have factions.");
+        United.logger().error("Unable to create mob " + mobType + " with faction, vanilla mobs can't have factions.");
         return null;
     }
 
     public UUID createMobAtLocation(String mobType, Location location, Player owner, double level) {
-        Logger.logError("Unable to create mob " + mobType + " with owner, vanilla mobs can't be owned.");
+        United.logger().error("Unable to create mob " + mobType + " with owner, vanilla mobs can't be owned.");
         return null;
     }
 
     public UUID createMobAtLocation(String mobType, Location location, Player owner, double level, String faction) {
-        Logger.logError("Unable to create mob " + mobType + " with owner, vanilla mobs can't be owned.");
+        United.logger().error("Unable to create mob " + mobType + " with owner, vanilla mobs can't be owned.");
         return null;
     }
 

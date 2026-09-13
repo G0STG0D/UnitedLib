@@ -5,7 +5,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.unitedlands.annotations.UnitedListener;
-import org.unitedlands.utils.Logger;
+import org.unitedlands.utils.United;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
@@ -30,8 +30,8 @@ public class UnitedListenerRegistrar {
                         .forEach(entry -> tryRegister(plugin, entry.getName()));
             }
         } catch (Exception e) {
-            Logger.logError("JAR-Scan failed for package: " + plugin.getClass().getPackageName());
-            Logger.logError(e.getMessage());
+            United.logger().error("JAR-Scan failed for package: " + plugin.getClass().getPackageName());
+            United.logger().error(e.getMessage());
         }
 
     }
@@ -62,8 +62,8 @@ public class UnitedListenerRegistrar {
             registered.computeIfAbsent(plugin, k -> new ArrayList<>()).add(instance);
 
         } catch (Throwable e) {
-            Logger.logError("Could not register listener: " + className);
-            Logger.logError(e.getMessage());
+            United.logger().error("Could not register listener: " + className);
+            United.logger().error(e.getMessage());
         }
     }
 

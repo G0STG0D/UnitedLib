@@ -1,44 +1,48 @@
 package org.unitedlands.utils;
 
-import org.unitedlands.UnitedLib;
-
+@Deprecated(forRemoval = true)
 public class Logger {
 
-    private static final UnitedLib plugin;
+    private Logger() {}
 
-    static {
-        plugin = UnitedLib.getPlugin(UnitedLib.class);
-    }
-
+    @Deprecated(forRemoval = true)
     public static void log(String message) {
-        plugin.getLogger().info(message);
+        United.logger().info(message);
     }
 
+    @Deprecated(forRemoval = true)
     public static void log(String message, String prefix) {
-        plugin.getLogger().info("[" + prefix + "] " + message);
+        United.logger().info(message, prefix);
     }
 
+    @Deprecated(forRemoval = true)
     public static void logWarning(String message) {
-        plugin.getLogger().warning(message);
+        United.logger().warning(message);
     }
 
+    @Deprecated(forRemoval = true)
     public static void logWarning(String message, String prefix) {
-        plugin.getLogger().warning("[" + prefix + "] " + message);
+        United.logger().warning(message, prefix);
     }
 
+    @Deprecated(forRemoval = true)
     public static void logError(String message) {
-        plugin.getLogger().severe(message);
+        United.logger().error(message);
     }
 
+    @Deprecated(forRemoval = true)
     public static void logError(String message, String prefix) {
-        plugin.getLogger().severe("[" + prefix + "] " + message);
+        United.logger().error(message, prefix);
     }
 
+    @Deprecated(forRemoval = true)
     public static void debug(String message) {
-        plugin.getLogger().info(message);
+        United.logger().debug(message);
     }
 
+    @Deprecated(forRemoval = true)
     public static void debug(String message, String prefix) {
-        plugin.getLogger().info("[" + prefix + "] " + message);
+        United.logger().debug(message, prefix);
     }
+
 }

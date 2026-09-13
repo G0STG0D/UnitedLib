@@ -5,7 +5,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jspecify.annotations.NonNull;
 import org.unitedlands.annotations.UnitedCommand;
 import org.unitedlands.annotations.UnitedSubCommand;
-import org.unitedlands.utils.Logger;
+import org.unitedlands.utils.United;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
@@ -32,8 +32,8 @@ public class UnitedCommandRegistrar {
                         .forEach(entry -> collectNode(plugin, entry.getName(), nodes));
             }
         } catch(Throwable e) {
-            Logger.logError("Command registration failed for package: " + plugin.getClass().getPackageName());
-            Logger.logError(e.getMessage());
+            United.logger().error("Command registration failed for package: " + plugin.getClass().getPackageName());
+            United.logger().error(e.getMessage());
         }
 
         var roots      = buildTree(nodes);
@@ -63,7 +63,7 @@ public class UnitedCommandRegistrar {
             return;
 
         if (!UnitedCommandExecutor.class.isAssignableFrom(clazz) || clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {
-            Logger.logError("Command has to implement UnitedCommandExecutor: " + className);
+            United.logger().error("Command has to implement UnitedCommandExecutor: " + className);
             return;
         }
 
@@ -74,8 +74,8 @@ public class UnitedCommandRegistrar {
             nodes.put(clazz, cmdNode);
             executorPlugins.put(executor, plugin);
         } catch(Exception e) {
-            Logger.logError("Could not load command: " + className);
-            Logger.logError(e.getMessage());
+            United.logger().error("Could not load command: " + className);
+            United.logger().error(e.getMessage());
         }
     }
 
@@ -104,7 +104,7 @@ public class UnitedCommandRegistrar {
             } else {
                 var parent = nodes.get(clazz.getAnnotation(UnitedSubCommand.class).parent());
                 if (parent == null) {
-                    Logger.logError("Parent command not found for subcommand: " + clazz.getName());
+                    United.logger().error("Parent command not found for subcommand: " + clazz.getName());
                     return;
                 }
 

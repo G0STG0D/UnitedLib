@@ -6,7 +6,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.unitedlands.annotations.UnitedConfig;
 import org.unitedlands.annotations.UnitedSection;
 import org.unitedlands.annotations.UnitedSetting;
-import org.unitedlands.utils.Logger;
+import org.unitedlands.utils.United;
 
 import java.io.File;
 import java.lang.reflect.*;
@@ -24,6 +24,16 @@ public class UnitedConfigs {
 
     public static <T extends UnitedConfigHandler> T get(Class<T> clazz) {
         var entry = entries.get(clazz);
+
+        if (entry == null) {
+            try {
+                register(JavaPlugin.getProvidingPlugin(clazz), clazz);
+                entry = entries.get(clazz);
+            } catch(IllegalArgumentException e) {
+                return null;
+            }
+        }
+
         return entry == null ? null : clazz.cast(entry.proxy);
     }
 
@@ -48,7 +58,7 @@ public class UnitedConfigs {
         try {
             entry.config().load(file);
         } catch (Exception e) {
-            Logger.logError("Failed to reload " + clazz.getSimpleName() + ": " + e.getMessage());
+            United.logger().error("Failed to reload " + clazz.getSimpleName() + ": " + e.getMessage());
         }
     }
 
@@ -143,7 +153,7 @@ public class UnitedConfigs {
 
     private static Object resolveValue(YamlConfiguration config, String key, String def, Class<?> type, Type generic) {
         if (!config.contains(key))
-            Logger.logWarning("Missing config key '" + key + "', using default '" + def + "'");
+            United.logger().warning("Missing config key '" + key + "', using default '" + def + "'");
 
         if (type.isEnum())
             return resolveEnum(config, key, def, type);
@@ -177,7 +187,7 @@ public class UnitedConfigs {
         try {
             return Enum.valueOf((Class<Enum>) type, value.toUpperCase());
         } catch (IllegalArgumentException e) {
-            Logger.logWarning("Invalid value '" + value + "' for '" + key + "', expected one of: " + type.getSimpleName());
+            United.logger().warning("Invalid value '" + value + "' for '" + key + "', expected one of: " + type.getSimpleName());
             return null;
         }
     }
@@ -210,7 +220,7 @@ public class UnitedConfigs {
                     try {
                         return Enum.valueOf((Class<Enum>) type, value.toUpperCase());
                     } catch(IllegalArgumentException e) {
-                        Logger.logWarning("Invalid value '" + value + "' in list '" + key + "', expected one of: " + type.getSimpleName());
+                        United.logger().warning("Invalid value '" + value + "' in list '" + key + "', expected one of: " + type.getSimpleName());
                         return null;
                     }
                 })
@@ -252,7 +262,7 @@ public class UnitedConfigs {
             try {
                 plugin.saveResource(fileName, false);
             } catch (Exception e) {
-                Logger.logError("Config file " + fileName + " for " + plugin.getName() + " could not be created: " + e.getMessage());
+                United.logger().error("Config file " + fileName + " for " + plugin.getName() + " could not be created: " + e.getMessage());
             }
         }
 

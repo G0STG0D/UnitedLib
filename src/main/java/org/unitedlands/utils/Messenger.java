@@ -1,221 +1,155 @@
 package org.unitedlands.utils;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import org.bukkit.plugin.java.JavaPlugin;
-import org.unitedlands.UnitedLib;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.unitedlands.annotations.UnitedCommand;
-import org.unitedlands.annotations.UnitedSubCommand;
 import org.unitedlands.registrars.command.UnitedCommandExecutor;
 
+@Deprecated(forRemoval = true)
 public class Messenger {
 
-    @SuppressWarnings("unused")
-    private static final UnitedLib plugin;
+    private Messenger() {}
 
-    static {
-        plugin = UnitedLib.getPlugin(UnitedLib.class);
+    @Deprecated(forRemoval = true)
+    public static void send(Collection<? extends Audience> targets, List<String> lines, Map<String, String> replacements, String prefix) {
+        if (targets == null || targets.isEmpty())
+            return;
+        United.messenger().sendRawWithPrefix(Audience.audience(targets), resolve(String.join("\n", lines), replacements), prefix);
     }
 
-    public static void send(
-            Collection<? extends Audience> targets,
-            List<String> lines,
-            Map<String, String> replacements,
-            String prefix) {
-
-        if (targets == null || targets.isEmpty()) {
-            return;
-        }
-        if (lines == null || lines.isEmpty()) {
-            return;
-        }
-
-        Component component = buildComponent(lines, replacements, prefix);
-
-        var receiverAudience = Audience.audience(targets);
-        receiverAudience.sendMessage(component);
-
-    }
-
+    @Deprecated(forRemoval = true)
     public static void send(Collection<? extends Audience> targets, Component messageComponent) {
-        if (targets == null || targets.isEmpty()) {
-            return;
-        }
-        var receiverAudience = Audience.audience(targets);
-        receiverAudience.sendMessage(messageComponent);
+        if (targets != null && !targets.isEmpty())
+            Audience.audience(targets).sendMessage(messageComponent);
     }
 
+    @Deprecated(forRemoval = true)
     public static void send(Audience target, Component messageComponent) {
-        if (target == null) {
-            return;
-        }
-        send(Collections.singleton(target), messageComponent);
+        if (target != null)
+            target.sendMessage(messageComponent);
     }
 
-    private static Component buildComponent(List<String> lines, Map<String, String> replacements, String prefix) {
-
-        List<String> processed = new ArrayList<>(lines.size());
-        for (String line : lines) {
-            String modified = applyReplacements(line, replacements);
-            if (prefix != null && !prefix.isEmpty()) {
-                modified = prefix + modified;
-            }
-            processed.add(modified);
-        }
-
-        String joined = String.join("\n", processed);
-        return MiniMessage.miniMessage().deserialize(joined);
-    }
-
-    private static String applyReplacements(String input, Map<String, String> replacements) {
-        if (replacements == null || replacements.isEmpty()) {
-            return input;
-        }
-
-        String output = input;
-        for (Map.Entry<String, String> entry : replacements.entrySet()) {
-            if (entry.getValue() == null)
-                continue;
-            output = output.replace("{" + entry.getKey() + "}", entry.getValue());
-        }
-        return output;
-    }
-
-
+    @Deprecated(forRemoval = true)
     public static Component getMessage(String line) {
-        return buildComponent(Collections.singletonList(line), null, null);
+        return United.messenger().buildComponentRaw(line, null, null);
     }
 
+    @Deprecated(forRemoval = true)
     public static Component getMessage(String line, Map<String, String> replacements) {
-        return buildComponent(Collections.singletonList(line), replacements, null);
+        return United.messenger().buildComponentRaw(resolve(line, replacements), null, null);
     }
 
+    @Deprecated(forRemoval = true)
     public static Component getMessage(String line, Map<String, String> replacements, String prefix) {
-        return buildComponent(Collections.singletonList(line), replacements, prefix);
+        return United.messenger().buildComponentRaw(resolve(line, replacements), null, prefix);
     }
 
+    @Deprecated(forRemoval = true)
     public static Component getMessage(List<String> lines) {
-        return buildComponent(lines, null, null);
+        return United.messenger().buildComponentRaw(String.join("\n", lines), null, null);
     }
 
+    @Deprecated(forRemoval = true)
     public static Component getMessage(List<String> lines, Map<String, String> replacements) {
-        return buildComponent(lines, replacements, null);
+        return United.messenger().buildComponentRaw(resolve(String.join("\n", lines), replacements), null, null);
     }
 
+    @Deprecated(forRemoval = true)
     public static Component getMessage(List<String> lines, Map<String, String> replacements, String prefix) {
-        return buildComponent(lines, replacements, prefix);
+        return United.messenger().buildComponentRaw(resolve(String.join("\n", lines), replacements), null, prefix);
     }
 
-
-    // -------------------------------------------------------------------------------------------
-    // Overloads: single sender, single String
-    // -------------------------------------------------------------------------------------------
-
+    @Deprecated(forRemoval = true)
     public static void sendMessage(Audience target, String message) {
-        sendMessage(target, message, Collections.emptyMap(), null);
+        United.messenger().sendRaw(target, message);
     }
 
+    @Deprecated(forRemoval = true)
     public static void sendMessage(Audience target, String message, Map<String, String> replacements) {
-        sendMessage(target, message, replacements, null);
+        United.messenger().sendRaw(target, resolve(message, replacements));
     }
 
+    @Deprecated(forRemoval = true)
     public static void sendMessage(Audience target, String message, Map<String, String> replacements, String prefix) {
-        Objects.requireNonNull(message, "message");
-        send(Collections.singletonList(target), Collections.singletonList(message), replacements, prefix);
+        United.messenger().sendRawWithPrefix(target, resolve(message, replacements), prefix);
     }
 
+    @Deprecated(forRemoval = true)
     public static void sendUsage(Audience target, UnitedCommandExecutor command, JavaPlugin plugin) {
-        var clazz = command.getClass();
-        var usage = "";
-
-        if (clazz.isAnnotationPresent(UnitedCommand.class))
-            usage = clazz.getAnnotation(UnitedCommand.class).usage();
-        else if (clazz.isAnnotationPresent(UnitedSubCommand.class))
-            usage = clazz.getAnnotation(UnitedSubCommand.class).usage();
-
-        if (usage.isEmpty())
-            return;
-
-        var config = UnitedLib.getInstance().getConfig();
-        var prefix = getUnitedPrefix(plugin);
-
-        sendMessage(target, config.getString("messages.usage"), Map.of("usage", usage), prefix);
+        United.messenger().sendUsage(target, command, plugin);
     }
 
-    // -------------------------------------------------------------------------------------------
-    // Overloads: multiple targets, single String
-    // -------------------------------------------------------------------------------------------
-
+    @Deprecated(forRemoval = true)
     public static void sendMessage(Collection<? extends Audience> targets, String message) {
-        sendMessage(targets, message, Collections.emptyMap(), null);
+        if (targets != null && !targets.isEmpty())
+            United.messenger().sendRaw(Audience.audience(targets), message);
     }
 
+    @Deprecated(forRemoval = true)
     public static void sendMessage(Collection<? extends Audience> targets, String message, Map<String, String> replacements) {
-        sendMessage(targets, message, replacements, null);
+        if (targets != null && !targets.isEmpty())
+            United.messenger().sendRaw(Audience.audience(targets), resolve(message, replacements));
     }
 
-    public static void sendMessage(Collection<? extends Audience> targets, String message, Map<String, String> replacements,
-            String prefix) {
-        Objects.requireNonNull(message, "message");
-        send(targets, Collections.singletonList(message), replacements, prefix);
+    @Deprecated(forRemoval = true)
+    public static void sendMessage(Collection<? extends Audience> targets, String message, Map<String, String> replacements, String prefix) {
+        if (targets != null && !targets.isEmpty())
+            United.messenger().sendRawWithPrefix(Audience.audience(targets), resolve(message, replacements), prefix);
     }
 
-    // -------------------------------------------------------------------------------------------
-    // Overloads: single sender, multiple lines
-    // -------------------------------------------------------------------------------------------
-
+    @Deprecated(forRemoval = true)
     public static void sendMessage(Audience target, List<String> lines) {
-        sendMessage(target, lines, Collections.emptyMap(), null);
+        United.messenger().sendRaw(target, String.join("\n", lines));
     }
 
+    @Deprecated(forRemoval = true)
     public static void sendMessage(Audience target, List<String> lines, Map<String, String> replacements) {
-        sendMessage(target, lines, replacements, null);
+        United.messenger().sendRaw(target, resolve(String.join("\n", lines), replacements));
     }
 
+    @Deprecated(forRemoval = true)
     public static void sendMessage(Audience target, List<String> lines, Map<String, String> replacements, String prefix) {
-        send(Collections.singletonList(target), lines, replacements, prefix);
+        United.messenger().sendRawWithPrefix(target, resolve(String.join("\n", lines), replacements), prefix);
     }
 
-    // -------------------------------------------------------------------------------------------
-    // Overloads: multiple targets, multiple lines
-    // -------------------------------------------------------------------------------------------
-
+    @Deprecated(forRemoval = true)
     public static void sendMessage(Collection<? extends Audience> targets, List<String> lines) {
-        sendMessage(targets, lines, Collections.emptyMap(), null);
+        if (targets != null && !targets.isEmpty())
+            United.messenger().sendRaw(Audience.audience(targets), String.join("\n", lines));
     }
 
-    public static void sendMessage(Collection<? extends Audience> targets, List<String> lines,
-            Map<String, String> replacements) {
-        sendMessage(targets, lines, replacements, null);
+    @Deprecated(forRemoval = true)
+    public static void sendMessage(Collection<? extends Audience> targets, List<String> lines, Map<String, String> replacements) {
+        if (targets != null && !targets.isEmpty())
+            United.messenger().sendRaw(Audience.audience(targets), resolve(String.join("\n", lines), replacements));
     }
 
-    public static void sendMessage(Collection<? extends Audience> targets, List<String> lines,
-            Map<String, String> replacements, String prefix) {
-        send(targets, lines, replacements, prefix);
+    @Deprecated(forRemoval = true)
+    public static void sendMessage(Collection<? extends Audience> targets, List<String> lines, Map<String, String> replacements, String prefix) {
+        if (targets != null && !targets.isEmpty())
+            United.messenger().sendRawWithPrefix(Audience.audience(targets), resolve(String.join("\n", lines), replacements), prefix);
     }
 
-    // -------------------------------------------------------------------------------------------
-    // Utilities
-    // -------------------------------------------------------------------------------------------
-
-    @SuppressWarnings("DataFlowIssue")
+    @Deprecated(forRemoval = true)
     public static String getUnitedPrefix(JavaPlugin plugin) {
-        var config = UnitedLib.getInstance().getConfig();
+        return United.messenger().getUnitedPrefix(plugin);
+    }
 
-        var name = plugin.getName().replace("United", "");
-        if (name.equalsIgnoreCase("Lands"))
-            return config.getString("messages.prefix-ul");;
+    private static String resolve(String input, Map<String, String> replacements) {
+        if (replacements == null || replacements.isEmpty())
+            return input;
 
-        return config.getString("messages.prefix").replace("{name}", name);
+        var output = input;
+        for (var entry : replacements.entrySet())
+            if (entry.getValue() != null)
+                output = output.replace("{" + entry.getKey() + "}", entry.getValue());
+
+        return output;
     }
 
 }

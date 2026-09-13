@@ -2,7 +2,7 @@ package org.unitedlands.registrars.config;
 
 import org.bukkit.plugin.java.JavaPlugin;
 import org.unitedlands.annotations.UnitedConfig;
-import org.unitedlands.utils.Logger;
+import org.unitedlands.utils.United;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
@@ -25,7 +25,7 @@ public class UnitedConfigRegistrar {
                         .forEach(entry -> tryRegister(plugin, entry.getName()));
             }
         } catch(Exception e) {
-            Logger.logError("Config scan failed for " + plugin.getName() + ": " + e.getMessage());
+            United.logger().error("Config scan failed for " + plugin.getName() + ": " + e.getMessage());
         }
     }
 
@@ -49,14 +49,14 @@ public class UnitedConfigRegistrar {
                     .anyMatch(m -> Modifier.isStatic(m.getModifiers()) && m.getName().equals("get") && m.getParameterCount() == 0);
 
             if (!hasGet)
-                Logger.logWarning(clazz.getSimpleName()
+                United.logger().warning(clazz.getSimpleName()
                         + " is missing: static " + clazz.getSimpleName()
                         + " get() { return UnitedConfigs.get(" + clazz.getSimpleName() + ".class); }");
 
             UnitedConfigs.register(plugin, clazz.asSubclass(UnitedConfigHandler.class));
         } catch(Throwable e) {
-            Logger.logError("Could not register config: " + className);
-            Logger.logError(e.getMessage());
+            United.logger().error("Could not register config: " + className);
+            United.logger().error(e.getMessage());
         }
 
     }

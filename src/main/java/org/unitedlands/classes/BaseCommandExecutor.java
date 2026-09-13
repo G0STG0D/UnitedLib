@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import org.unitedlands.interfaces.ICommandHandler;
 import org.unitedlands.interfaces.IMessageProvider;
 import org.unitedlands.registrars.command.UnitedCommandExecutor;
-import org.unitedlands.utils.Formatter;
+import org.unitedlands.utils.United;
 
 /**
  * @deprecated Use {@link UnitedCommandExecutor} instead.
@@ -57,7 +57,7 @@ public abstract class BaseCommandExecutor<P extends Plugin> implements CommandEx
             }
         }
 
-        return Formatter.getSortedCompletions(input, options);
+        return United.formatter().getSortedCompletions(input, options);
     }
 
     @Override

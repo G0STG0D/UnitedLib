@@ -8,6 +8,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.unitedlands.registrars.command.UnitedCommandRegistrar;
 import org.unitedlands.registrars.config.UnitedConfigRegistrar;
 import org.unitedlands.registrars.listener.UnitedListenerRegistrar;
+import org.unitedlands.registrars.messages.UnitedMessagesRegistrar;
 
 public class UnitedLifecycleListener implements Listener {
 
@@ -22,6 +23,7 @@ public class UnitedLifecycleListener implements Listener {
             return;
 
         UnitedConfigRegistrar.registerAll(plugin);
+        UnitedMessagesRegistrar.registerAll(plugin);
         UnitedListenerRegistrar.registerAll(plugin);
         UnitedCommandRegistrar.registerAll(plugin);
     }
@@ -32,6 +34,7 @@ public class UnitedLifecycleListener implements Listener {
             return;
 
         UnitedConfigRegistrar.unregisterAll(plugin);
+        UnitedMessagesRegistrar.unregisterAll(plugin);
         UnitedListenerRegistrar.unregisterAll(plugin);
         UnitedCommandRegistrar.unregisterAll(plugin);
     }

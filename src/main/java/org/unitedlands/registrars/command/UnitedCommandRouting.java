@@ -7,12 +7,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 import org.unitedlands.UnitedLib;
-import org.unitedlands.utils.Messenger;
+import org.unitedlands.registrars.messages.UnitedMessagesRegistrar;
+import org.unitedlands.utils.United;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 class UnitedCommandRouting extends Command {
@@ -24,7 +24,7 @@ class UnitedCommandRouting extends Command {
         super(root.name, root.description, root.usage, List.of(root.aliases));
 
         this.root   = root;
-        this.prefix = Messenger.getUnitedPrefix(plugin);
+        this.prefix = United.messenger().getUnitedPrefix(plugin);
 
         if (!root.permission.isEmpty())
             setPermission(root.permission);
@@ -37,20 +37,19 @@ class UnitedCommandRouting extends Command {
     }
 
     private void route(CommandSender sender, String label, UnitedCommandNode node, String[] args, int depth) {
-        var config = UnitedLib.getInstance().getConfig();
 
         if (!node.permission.isEmpty() && !sender.hasPermission(node.permission)) {
-            Messenger.sendMessage(sender, config.getString("messages.no-permission"), null, prefix);
+            sendFrameworkMessage(sender, "no-permission");
             return;
         }
 
         if (node.playerOnly && !(sender instanceof Player)) {
-            Messenger.sendMessage(sender, config.getString("messages.player-only"), null, prefix);
+            sendFrameworkMessage(sender, "player-only");
             return;
         }
 
         if (node.cooldown > 0 && sender instanceof Player player && node.isOnCooldown(player.getUniqueId()) && !player.hasPermission(node.cooldownPermission)) {
-            Messenger.sendMessage(sender, config.getString("messages.cooldown"), Map.of("time", String.valueOf(node.remainingCooldown(player.getUniqueId()))), prefix);
+            sendFrameworkMessage(sender, "cooldown", node.remainingCooldown(player.getUniqueId()));
             return;
         }
 
@@ -73,13 +72,13 @@ class UnitedCommandRouting extends Command {
             }
             
             if (!node.childNames().isEmpty() && !node.usage.isEmpty()) {
-                Messenger.sendMessage(sender, config.getString("messages.usage"), Map.of("usage", node.usage), prefix);
+                sendFrameworkMessage(sender, "usage", node.usage);
                 return;
             }
         }
 
         if (node.catchAllChild != null && !node.usage.isEmpty()) {
-            Messenger.sendMessage(sender, config.getString("messages.usage"), Map.of("usage", node.usage), prefix);
+            sendFrameworkMessage(sender, "usage", node.usage);
             return;
         }
 
@@ -90,6 +89,12 @@ class UnitedCommandRouting extends Command {
     @Override
     public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, String @NotNull [] args) throws IllegalArgumentException {
         return routeTab(sender, alias, root, args, 0);
+    }
+
+    private void sendFrameworkMessage(CommandSender sender, String path, Object... values) {
+        var locale  = United.messenger().resolveLocale(sender);
+        var message = UnitedMessagesRegistrar.resolve(UnitedLib.getInstance(), locale, path);
+        United.messenger().sendRawWithPrefix(sender, message, prefix, values);
     }
 
     private List<String> routeTab(CommandSender sender, String alias, UnitedCommandNode node, String[] args, int depth) {

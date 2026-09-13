@@ -5,7 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.unitedlands.annotations.UnitedMenu;
-import org.unitedlands.utils.Logger;
+import org.unitedlands.utils.United;
 
 public class UnitedMenus {
 
@@ -14,7 +14,7 @@ public class UnitedMenus {
     public static void open(Player player, UnitedMenuHandler handler) {
         var ann = handler.getClass().getAnnotation(UnitedMenu.class);
         if (ann == null) {
-            Logger.logError("Missing @UnitedMenu annotation on " + handler.getClass().getName());
+            United.logger().error("Missing @UnitedMenu annotation on " + handler.getClass().getName());
             return;
         }
 

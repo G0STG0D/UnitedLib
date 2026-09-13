@@ -14,8 +14,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionType;
-import org.unitedlands.utils.Formatter;
-import org.unitedlands.utils.Logger;
 
 import com.nexomc.nexo.api.NexoBlocks;
 import com.nexomc.nexo.api.NexoFurniture;
@@ -23,6 +21,7 @@ import com.nexomc.nexo.api.NexoItems;
 import com.nexomc.nexo.items.ItemBuilder;
 
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.unitedlands.utils.United;
 
 public class NexoFactory extends BaseItemFactory {
 
@@ -120,7 +119,7 @@ public class NexoFactory extends BaseItemFactory {
         // Set amount to 1 to avoid parsing errors for stacks that exceed max stack size
         if (customItem != null) {
             customItem.setAmount(1);
-            return Formatter.removeLegacyFormatting(
+            return United.formatter().removeLegacyFormatting(
                     PlainTextComponentSerializer.plainText().serialize(customItem.getItemName()));
         } else {
             return getVanillaDisplayName(itemStack);
@@ -179,7 +178,7 @@ public class NexoFactory extends BaseItemFactory {
             }
 
         } catch (Exception ex) {
-            Logger.logError("Could not place block " + id);
+            United.logger().error("Could not place block " + id);
         }
 
     }
@@ -197,7 +196,7 @@ public class NexoFactory extends BaseItemFactory {
                 }
             }
         } catch (Exception ex) {
-            Logger.logError("Could not remove block at " + block.getLocation());
+            United.logger().error("Could not remove block at " + block.getLocation());
         }
     }
 
@@ -265,12 +264,12 @@ public class NexoFactory extends BaseItemFactory {
         var type = itemStack.getType().toString();
         if (type.contains("POTION")) {
             if (itemStack.getItemMeta() instanceof PotionMeta potionMeta && potionMeta.hasBasePotionType()) {
-                type = Formatter.formatReadable(type) + " (" +
-                        Formatter.formatReadable(potionMeta.getBasePotionType().toString())
+                type = United.formatter().formatReadable(type) + " (" +
+                        United.formatter().formatReadable(potionMeta.getBasePotionType().toString())
                         + ")";
             }
             return type;
         }
-        return Formatter.formatReadable(itemStack.getType().toString());
+        return United.formatter().formatReadable(itemStack.getType().toString());
     }
 }
