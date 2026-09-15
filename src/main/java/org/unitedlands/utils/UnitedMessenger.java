@@ -50,6 +50,20 @@ public class UnitedMessenger {
     }
 
     // ────────────────────────────────────────────
+    //   Component sending
+    // ────────────────────────────────────────────
+
+    public void send(Audience target, Component component) {
+        if (target != null)
+            target.sendMessage(component);
+    }
+
+    public void send(Collection<? extends Audience> targets, Component component) {
+        if (targets != null && !targets.isEmpty())
+            Audience.audience(targets).sendMessage(component);
+    }
+
+    // ────────────────────────────────────────────
     //   Raw message sending
     // ────────────────────────────────────────────
 
@@ -63,10 +77,22 @@ public class UnitedMessenger {
     }
 
     // ────────────────────────────────────────────
+    //   Raw message get
+    // ────────────────────────────────────────────
+
+    public String get(String path, Object... values) {
+        return get(null, path, values);
+    }
+
+    public String get(Audience target, String path, Object... values) {
+        return applyReplacements(resolveMessage(target, path), values);
+    }
+
+    // ────────────────────────────────────────────
     //   Explicit-prefix sending
     // ────────────────────────────────────────────
 
-    public void sendRawWithPrefix(Audience target, String message, String rawPrefix, Object... values) {
+    protected void sendRawWithPrefix(Audience target, String message, String rawPrefix, Object... values) {
         if (target != null)
             target.sendMessage(buildComponentRaw(message, values, rawPrefix));
     }

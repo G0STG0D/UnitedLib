@@ -75,7 +75,7 @@ public class UnitedMessagesRegistrar {
 
         var language = locale != null ? locale.getLanguage() : DEFAULT_LOCALE;
 
-        var config   = locales.getOrDefault(language, locales.get(DEFAULT_LOCALE));
+        var config = locales.getOrDefault(language, locales.get(DEFAULT_LOCALE));
         if (config == null)
             return MISSING_FORMAT.formatted(path);
 
