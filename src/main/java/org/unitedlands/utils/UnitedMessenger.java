@@ -27,18 +27,26 @@ public class UnitedMessenger {
     // ────────────────────────────────────────────
 
     public void send(Audience target, String path, Object... values) {
+        send(target, path, true, values);
+    }
+
+    public void send(Audience target, String path, boolean withPrefix, Object... values) {
         if (target == null)
             return;
 
-        target.sendMessage(buildComponent(resolveMessage(target, path), values, true));
+        target.sendMessage(buildComponent(resolveMessage(target, path), values, withPrefix));
     }
 
     public void send(Collection<? extends Audience> targets, String path, Object... values) {
+        send(targets, path, true, values);
+    }
+
+    public void send(Collection<? extends Audience> targets, String path,  boolean withPrefix, Object... values) {
         if (targets == null || targets.isEmpty())
             return;
 
         for (var target : targets)
-            send(target, path, values);
+            send(target, path, withPrefix, values);
     }
 
     // ────────────────────────────────────────────
@@ -46,8 +54,12 @@ public class UnitedMessenger {
     // ────────────────────────────────────────────
 
     public void sendRaw(Audience target, String message, Object... values) {
+        sendRaw(target, message, true, values);
+    }
+
+    public void sendRaw(Audience target, String message, boolean withPrefix, Object... values) {
         if (target != null)
-            target.sendMessage(buildComponent(message, values, true));
+            target.sendMessage(buildComponent(message, values, withPrefix));
     }
 
     // ────────────────────────────────────────────
