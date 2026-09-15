@@ -92,7 +92,7 @@ public class UnitedMessenger {
     //   Explicit-prefix sending
     // ────────────────────────────────────────────
 
-    protected void sendRawWithPrefix(Audience target, String message, String rawPrefix, Object... values) {
+    public void sendRawWithPrefix(Audience target, String message, String rawPrefix, Object... values) {
         if (target != null)
             target.sendMessage(buildComponentRaw(message, values, rawPrefix));
     }
