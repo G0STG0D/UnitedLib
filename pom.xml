@@ -30,10 +30,6 @@
             <url>https://jitpack.io</url>
         </repository>
         <repository>
-            <id>matteodev</id>
-            <url>https://www.matteodev.it/spigot/public/maven/</url>
-        </repository>
-        <repository>
             <id>nexus</id>
             <name>Lumine Releases</name>
             <url>https://mvn.lumine.io/repository/maven-public/</url>
@@ -42,10 +38,6 @@
             <id>nexomc-releases</id>
             <name>Reposilite Repository</name>
             <url>https://repo.nexomc.com/releases</url>
-        </repository>
-        <repository>
-            <id>triumphteam</id>
-            <url>https://repo.triumphteam.dev/snapshots</url>
         </repository>
     </repositories>
 
@@ -57,9 +49,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>dev.lone</groupId>
-            <artifactId>api-itemsadder</artifactId>
-            <version>4.0.10</version>
+            <groupId>beer.devs</groupId>
+            <artifactId>itemsadder-api</artifactId>
+            <version>4.0.18-beta-10</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
