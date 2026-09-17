@@ -63,7 +63,8 @@
                 <executions>
                     <execution>
                         <goals>
-                            </goals>
+                            <goal>jar</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>

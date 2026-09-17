@@ -50,6 +50,34 @@ public class UnitedMessenger {
     }
 
     // ────────────────────────────────────────────
+    //   Broadcasting
+    // ────────────────────────────────────────────
+
+    public void broadcast(String path, Object... values) {
+        broadcast(path, true, values);
+    }
+
+    public void broadcast(String path, boolean withPrefix, Object... values) {
+        send(Bukkit.getOnlinePlayers(), path, withPrefix, values);
+        send(Bukkit.getConsoleSender(), path, withPrefix, values);
+    }
+
+    public void broadcast(Audience ignore, String path, Object... values) {
+        broadcast(ignore, path, true, values);
+    }
+
+    public void broadcast(Audience ignore, String path, boolean withPrefix, Object... values) {
+        var players = Bukkit.getOnlinePlayers().stream()
+                .filter(p -> p != ignore)
+                .toList();
+
+        send(players, path, withPrefix, values);
+
+        if (ignore != Bukkit.getConsoleSender())
+            send(Bukkit.getConsoleSender(), path, withPrefix, values);
+    }
+
+    // ────────────────────────────────────────────
     //   Component sending
     // ────────────────────────────────────────────
 

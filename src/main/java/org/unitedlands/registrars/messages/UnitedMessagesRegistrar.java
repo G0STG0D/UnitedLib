@@ -13,7 +13,7 @@ import java.util.jar.JarFile;
 public class UnitedMessagesRegistrar {
 
     private static final String DEFAULT_LOCALE = "en";
-    private static final String MISSING_FORMAT = "<red><b>[missing message: %s]</b></red>";
+    private static final String MISSING_FORMAT = "<red>[missing message: <i>%s</i>]</red>";
 
     private static final Map<JavaPlugin, Map<String, YamlConfiguration>> entries = new HashMap<>();
 
