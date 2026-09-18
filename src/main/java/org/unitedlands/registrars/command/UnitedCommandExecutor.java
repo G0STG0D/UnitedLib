@@ -14,20 +14,19 @@ public interface UnitedCommandExecutor {
     }
 
     default void sendUsage(CommandSender sender) {
-        var plugin = UnitedCommandRegistrar.getPluginForExecutor(this);
-        United.messenger().sendUsage(sender, this, plugin);
+        United.messenger().sendUsage(sender, this, UnitedCommandRegistrar.getPluginForExecutor(this));
     }
 
     default void sendNoPermission(CommandSender sender) {
-        United.messenger().sendNoPermission(sender);
+        United.messenger().sendNoPermission(sender, UnitedCommandRegistrar.getPluginForExecutor(this));
     }
 
     default void sendPlayerOnly(CommandSender sender) {
-        United.messenger().sendPlayerOnly(sender);
+        United.messenger().sendPlayerOnly(sender, UnitedCommandRegistrar.getPluginForExecutor(this));
     }
 
     default void sendPlayerNotFound(CommandSender sender, String playerName) {
-        United.messenger().sendPlayerNotFound(sender, playerName);
+        United.messenger().sendPlayerNotFound(sender, playerName, UnitedCommandRegistrar.getPluginForExecutor(this));
     }
 
 }

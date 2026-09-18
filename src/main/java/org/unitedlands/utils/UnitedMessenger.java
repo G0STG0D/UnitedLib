@@ -109,15 +109,27 @@ public class UnitedMessenger {
     // ────────────────────────────────────────────
 
     public void sendNoPermission(Audience target) {
-        sendFrameworkMessage(target, "no-permission");
+        sendFrameworkMessage(target, "no-permission", resolvePrefix());
+    }
+
+    public void sendNoPermission(Audience target, JavaPlugin plugin) {
+        sendFrameworkMessage(target, "no-permission", plugin != null ? getUnitedPrefix(plugin) : null);
     }
 
     public void sendPlayerOnly(Audience target) {
-        sendFrameworkMessage(target, "player-only");
+        sendFrameworkMessage(target, "player-only", resolvePrefix());
+    }
+
+    public void sendPlayerOnly(Audience target, JavaPlugin plugin) {
+        sendFrameworkMessage(target, "player-only", plugin != null ? getUnitedPrefix(plugin) : null);
     }
 
     public void sendPlayerNotFound(Audience target, String playerName) {
-        sendFrameworkMessage(target, "player-not-found", playerName);
+        sendFrameworkMessage(target, "player-not-found", resolvePrefix(), playerName);
+    }
+
+    public void sendPlayerNotFound(Audience target, String playerName, JavaPlugin plugin) {
+        sendFrameworkMessage(target, "player-not-found", plugin != null ? getUnitedPrefix(plugin) : null, playerName);
     }
 
     // ────────────────────────────────────────────
@@ -208,10 +220,14 @@ public class UnitedMessenger {
     }
 
     Component buildComponentRaw(String message, Object[] values, String prefix) {
-        var text = applyReplacements(message, values);
+        var text = message;
         if (prefix != null && !prefix.isEmpty())
             text = prefix + text;
-        return MiniMessage.miniMessage().deserialize(text);
+
+        text = applyReplacements(text, values);
+
+        var component = MiniMessage.miniMessage().deserialize(text);
+        return applyComponentReplacements(component, values);
     }
 
     private String applyReplacements(String input, Object[] values) {
@@ -219,35 +235,44 @@ public class UnitedMessenger {
             return input;
 
         var output = input;
-        for (int i = 0; i < values.length; i++)
-            output = output.replace("{" + (i + 1) + "}", stringify(values[i]));
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] instanceof Component)
+                continue;
+
+            output = output.replace("{" + (i + 1) + "}", values[i] != null ? String.valueOf(values[i]) : "");
+        }
 
         return output;
     }
 
-    private String stringify(Object value) {
-        if (value == null)
-            return "";
+    private Component applyComponentReplacements(Component component, Object[] values) {
+        if (values == null || values.length == 0)
+            return component;
 
-        if (value instanceof Component component)
-            return MiniMessage.miniMessage().serialize(component) + "<reset>";
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] instanceof Component value) {
+                var placeholder = "{" + (i + 1) + "}";
+                component = component.replaceText(b -> b.matchLiteral(placeholder).replacement(value));
+            }
+        }
 
-        return String.valueOf(value);
+        return component;
     }
+
 
     private String resolvePrefix() {
         var plugin = PluginResolver.resolveCallingPlugin();
         return plugin != null ? getUnitedPrefix(plugin) : null;
     }
 
-    private void sendFrameworkMessage(Audience target, String path, Object... values) {
+    private void sendFrameworkMessage(Audience target, String path, String prefix, Object... values) {
         if (target == null)
             return;
 
         var locale  = resolveLocale(target);
         var message = UnitedMessagesRegistrar.resolve(UnitedLib.getInstance(), locale, path);
 
-        target.sendMessage(buildComponentRaw(message, values, resolvePrefix()));
+        target.sendMessage(buildComponentRaw(message, values, prefix));
     }
 
 }
