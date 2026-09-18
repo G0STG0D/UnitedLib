@@ -1,5 +1,8 @@
 package org.unitedlands.utils;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,6 +57,10 @@ public class UnitedFormatter {
 
     public String removeLegacyFormatting(String string) {
         return string.replaceAll("(?i)[§&][0-9A-FK-OR]", "");
+    }
+
+    public String plainText(Component component) {
+        return PlainTextComponentSerializer.plainText().serialize(component);
     }
 
 }

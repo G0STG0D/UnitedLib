@@ -1,4 +1,5 @@
 no-permission: "<red>You don't have permission to use this command.</red>"
 player-only: "<red>This command can only be used by players.</red>"
+player-not-found: "<red>The player <b>{1}</b> was not found.</red>"
 usage: "<gray><i>Usage:</i> {1}</gray>"
 cooldown: "<red>You must wait <bold>{1}s</bold> before using this command again.</red>"

@@ -18,4 +18,16 @@ public interface UnitedCommandExecutor {
         United.messenger().sendUsage(sender, this, plugin);
     }
 
+    default void sendNoPermission(CommandSender sender) {
+        United.messenger().sendNoPermission(sender);
+    }
+
+    default void sendPlayerOnly(CommandSender sender) {
+        United.messenger().sendPlayerOnly(sender);
+    }
+
+    default void sendPlayerNotFound(CommandSender sender, String playerName) {
+        United.messenger().sendPlayerNotFound(sender, playerName);
+    }
+
 }

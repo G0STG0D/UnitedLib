@@ -105,6 +105,22 @@ public class UnitedMessenger {
     }
 
     // ────────────────────────────────────────────
+    //   Send utils
+    // ────────────────────────────────────────────
+
+    public void sendNoPermission(Audience target) {
+        sendFrameworkMessage(target, "no-permission");
+    }
+
+    public void sendPlayerOnly(Audience target) {
+        sendFrameworkMessage(target, "player-only");
+    }
+
+    public void sendPlayerNotFound(Audience target, String playerName) {
+        sendFrameworkMessage(target, "player-not-found", playerName);
+    }
+
+    // ────────────────────────────────────────────
     //   Raw message get
     // ────────────────────────────────────────────
 
@@ -204,14 +220,34 @@ public class UnitedMessenger {
 
         var output = input;
         for (int i = 0; i < values.length; i++)
-            output = output.replace("{" + (i + 1) + "}", values[i] != null ? String.valueOf(values[i]) : "");
+            output = output.replace("{" + (i + 1) + "}", stringify(values[i]));
 
         return output;
+    }
+
+    private String stringify(Object value) {
+        if (value == null)
+            return "";
+
+        if (value instanceof Component component)
+            return MiniMessage.miniMessage().serialize(component) + "<reset>";
+
+        return String.valueOf(value);
     }
 
     private String resolvePrefix() {
         var plugin = PluginResolver.resolveCallingPlugin();
         return plugin != null ? getUnitedPrefix(plugin) : null;
+    }
+
+    private void sendFrameworkMessage(Audience target, String path, Object... values) {
+        if (target == null)
+            return;
+
+        var locale  = resolveLocale(target);
+        var message = UnitedMessagesRegistrar.resolve(UnitedLib.getInstance(), locale, path);
+
+        target.sendMessage(buildComponentRaw(message, values, resolvePrefix()));
     }
 
 }
