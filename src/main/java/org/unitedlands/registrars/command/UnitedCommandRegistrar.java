@@ -18,7 +18,8 @@ public class UnitedCommandRegistrar {
     private static final Map<UnitedCommandExecutor, JavaPlugin> executorPlugins = new HashMap<>();
 
     public static void registerAll(JavaPlugin plugin) {
-        var nodes = new LinkedHashMap<Class<?>, UnitedCommandNode>();
+        var nodes   = new LinkedHashMap<Class<?>, UnitedCommandNode>();
+        var skipped = new HashSet<Class<?>>();
 
         try {
             var url  = plugin.getClass().getProtectionDomain().getCodeSource().getLocation();
@@ -29,14 +30,14 @@ public class UnitedCommandRegistrar {
                         .filter(entry -> entry.getName().endsWith(".class")
                                 && !entry.getName().contains("$")
                                 && entry.getName().startsWith(path))
-                        .forEach(entry -> collectNode(plugin, entry.getName(), nodes));
+                        .forEach(entry -> collectNode(plugin, entry.getName(), nodes, skipped));
             }
         } catch(Throwable e) {
             United.logger().error("Command registration failed for package: " + plugin.getClass().getPackageName());
             United.logger().error(e.getMessage());
         }
 
-        var roots      = buildTree(nodes);
+        var roots      = buildTree(nodes, skipped);
         var commandMap = Bukkit.getServer().getCommandMap();
         var prefix     = plugin.getName().toLowerCase();
 
@@ -47,7 +48,7 @@ public class UnitedCommandRegistrar {
         });
     }
 
-    private static void collectNode(JavaPlugin plugin, String entryName, Map<Class<?>, UnitedCommandNode> nodes) {
+    private static void collectNode(JavaPlugin plugin, String entryName, Map<Class<?>, UnitedCommandNode> nodes, Set<Class<?>> skipped) {
         var className = entryName.replace('/', '.').replace(".class", "");
         Class<?> clazz;
 
@@ -61,6 +62,11 @@ public class UnitedCommandRegistrar {
         var isSub = clazz.isAnnotationPresent(UnitedSubCommand.class);
         if (!isCmd && !isSub)
             return;
+
+        if (!hasRequiredPlugins(clazz, isCmd)) {
+            skipped.add(clazz);
+            return;
+        }
 
         if (!UnitedCommandExecutor.class.isAssignableFrom(clazz) || clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {
             United.logger().error("Command has to implement UnitedCommandExecutor: " + className);
@@ -79,6 +85,20 @@ public class UnitedCommandRegistrar {
         }
     }
 
+    private static boolean hasRequiredPlugins(Class<?> clazz, boolean isCmd) {
+        var required = isCmd
+                ? clazz.getAnnotation(UnitedCommand.class).requirePlugins()
+                : clazz.getAnnotation(UnitedSubCommand.class).requirePlugins();
+
+        for (var dep : required) {
+            var depPlugin = Bukkit.getPluginManager().getPlugin(dep);
+            if (depPlugin == null || !depPlugin.isEnabled())
+                return false;
+        }
+
+        return true;
+    }
+
     private static @NonNull UnitedCommandNode getUnitedCommandNode(boolean isCmd, Class<?> clazz, UnitedCommandExecutor executor) {
         UnitedCommandNode node;
 
@@ -95,16 +115,19 @@ public class UnitedCommandRegistrar {
         return node;
     }
 
-    private static List<UnitedCommandNode> buildTree(Map<Class<?>, UnitedCommandNode> nodes) {
+    private static List<UnitedCommandNode> buildTree(Map<Class<?>, UnitedCommandNode> nodes, Set<Class<?>> skipped) {
         var roots = new ArrayList<UnitedCommandNode>();
 
         nodes.forEach((clazz, node) -> {
             if (clazz.isAnnotationPresent(UnitedCommand.class)) {
                 roots.add(node);
             } else {
-                var parent = nodes.get(clazz.getAnnotation(UnitedSubCommand.class).parent());
+                var parentClass = clazz.getAnnotation(UnitedSubCommand.class).parent();
+                var parent      = nodes.get(parentClass);
+
                 if (parent == null) {
-                    United.logger().error("Parent command not found for subcommand: " + clazz.getName());
+                    if (!skipped.contains(parentClass))
+                        United.logger().error("Parent command not found for subcommand: " + clazz.getName());
                     return;
                 }
 

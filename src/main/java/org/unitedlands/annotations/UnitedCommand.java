@@ -25,4 +25,6 @@ public @interface UnitedCommand {
 
     String cooldownPermission() default "united.lands.admin";
 
+    String[] requirePlugins() default {};
+
 }
