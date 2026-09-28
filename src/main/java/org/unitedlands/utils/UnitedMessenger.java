@@ -49,6 +49,21 @@ public class UnitedMessenger {
             send(target, path, withPrefix, values);
     }
 
+    public void send(Audience target, String path, JavaPlugin plugin, Object... values) {
+        send(target, path, plugin, true, values);
+    }
+
+    public void send(Audience target, String path, JavaPlugin plugin, boolean withPrefix, Object... values) {
+        if (target == null)
+            return;
+
+        var locale  = resolveLocale(target);
+        var message = UnitedMessagesRegistrar.resolve(plugin, locale, path);
+        var prefix  = withPrefix && plugin != null ? getUnitedPrefix(plugin) : null;
+
+        target.sendMessage(buildComponentRaw(message, values, prefix));
+    }
+
     // ────────────────────────────────────────────
     //   Broadcasting
     // ────────────────────────────────────────────
@@ -142,6 +157,17 @@ public class UnitedMessenger {
 
     public String get(Audience target, String path, Object... values) {
         return applyReplacements(resolveMessage(target, path), values);
+    }
+
+    public String get(String path, JavaPlugin plugin, Object... values) {
+        return get(null, path, plugin, values);
+    }
+
+    public String get(Audience target, String path, JavaPlugin plugin, Object... values) {
+        var locale  = resolveLocale(target);
+        var message = UnitedMessagesRegistrar.resolve(plugin, locale, path);
+
+        return applyReplacements(message, values);
     }
 
     // ────────────────────────────────────────────
