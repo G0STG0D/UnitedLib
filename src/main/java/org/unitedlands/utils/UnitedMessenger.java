@@ -3,6 +3,7 @@ package org.unitedlands.utils;
 import java.util.Collection;
 import java.util.Locale;
 
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -117,6 +118,41 @@ public class UnitedMessenger {
     public void sendRaw(Audience target, String message, Boolean withPrefix, Object... values) {
         if (target != null)
             target.sendMessage(buildComponent(message, values, withPrefix));
+    }
+
+    // ────────────────────────────────────────────
+    //   Framed sending
+    // ────────────────────────────────────────────
+
+    public void sendFramed(Audience target, String path, Object... values) {
+        sendFramed(target, path, PluginResolver.resolveCallingPlugin(), values);
+    }
+
+    public void sendFramed(Collection<? extends Audience> targets, String path, Object... values) {
+        if (targets == null || targets.isEmpty())
+            return;
+
+        var plugin = PluginResolver.resolveCallingPlugin();
+        for (var target : targets)
+            sendFramed(target, path, plugin, values);
+    }
+
+    public void sendFramed(Audience target, String path, JavaPlugin plugin, Object... values) {
+        if (target == null)
+            return;
+
+        var locale = resolveLocale(target);
+        var title  = UnitedMessagesRegistrar.resolve(plugin, locale, path + ".title");
+        var body   = UnitedMessagesRegistrar.resolve(plugin, locale, path + ".body");
+
+        var config = UnitedLibConfig.get().frame();
+        var mono   = !(target instanceof Player);
+        var style  = new UnitedFrame.Style(mono ? config.consoleWidth() : config.width(), mono, config.color(),
+                config.leftCap(), config.rightCap(), config.titleOpen(), config.titleClose(), config.footerCenter());
+
+        var titlePlain = MiniMessage.miniMessage().stripTags(applyReplacements(title, plainValues(values)));
+
+        target.sendMessage(buildComponentRaw(UnitedFrame.build(title, titlePlain, body, style), values, null));
     }
 
     // ────────────────────────────────────────────
@@ -285,6 +321,18 @@ public class UnitedMessenger {
         return component;
     }
 
+    private Object[] plainValues(Object[] values) {
+        if (values == null)
+            return null;
+
+        var plain = new Object[values.length];
+        for (int i = 0; i < values.length; i++)
+            plain[i] = values[i] instanceof Component component
+                    ? PlainTextComponentSerializer.plainText().serialize(component)
+                    : values[i];
+
+        return plain;
+    }
 
     private String resolvePrefix() {
         var plugin = PluginResolver.resolveCallingPlugin();
