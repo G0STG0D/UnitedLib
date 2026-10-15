@@ -30,7 +30,7 @@ public class UnitedMessenger {
         send(target, path, true, values);
     }
 
-    public void send(Audience target, String path, boolean withPrefix, Object... values) {
+    public void send(Audience target, String path, Boolean withPrefix, Object... values) {
         if (target == null)
             return;
 
@@ -41,7 +41,7 @@ public class UnitedMessenger {
         send(targets, path, true, values);
     }
 
-    public void send(Collection<? extends Audience> targets, String path,  boolean withPrefix, Object... values) {
+    public void send(Collection<? extends Audience> targets, String path,  Boolean withPrefix, Object... values) {
         if (targets == null || targets.isEmpty())
             return;
 
@@ -53,7 +53,7 @@ public class UnitedMessenger {
         send(target, path, plugin, true, values);
     }
 
-    public void send(Audience target, String path, JavaPlugin plugin, boolean withPrefix, Object... values) {
+    public void send(Audience target, String path, JavaPlugin plugin, Boolean withPrefix, Object... values) {
         if (target == null)
             return;
 
@@ -72,7 +72,7 @@ public class UnitedMessenger {
         broadcast(path, true, values);
     }
 
-    public void broadcast(String path, boolean withPrefix, Object... values) {
+    public void broadcast(String path, Boolean withPrefix, Object... values) {
         send(Bukkit.getOnlinePlayers(), path, withPrefix, values);
         send(Bukkit.getConsoleSender(), path, withPrefix, values);
     }
@@ -81,7 +81,7 @@ public class UnitedMessenger {
         broadcast(ignore, path, true, values);
     }
 
-    public void broadcast(Audience ignore, String path, boolean withPrefix, Object... values) {
+    public void broadcast(Audience ignore, String path, Boolean withPrefix, Object... values) {
         var players = Bukkit.getOnlinePlayers().stream()
                 .filter(p -> p != ignore)
                 .toList();
@@ -114,7 +114,7 @@ public class UnitedMessenger {
         sendRaw(target, message, true, values);
     }
 
-    public void sendRaw(Audience target, String message, boolean withPrefix, Object... values) {
+    public void sendRaw(Audience target, String message, Boolean withPrefix, Object... values) {
         if (target != null)
             target.sendMessage(buildComponent(message, values, withPrefix));
     }
