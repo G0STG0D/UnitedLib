@@ -1,3 +1,13 @@
 messages:
   prefix-ul: "<bold><red>U</red><white>L</white> <dark_gray>»</dark_gray></bold> <gray>"
   prefix: "<bold><red>U</red><white>L</white> <gray>{name}</gray> <dark_gray>»</dark_gray></bold> <gray>"
+
+frame:
+  width: 200
+  console-width: 50
+  color: "red"
+  left-cap: "+|✦"
+  right-cap: "|✦+"
+  title-open: "["
+  title-close: "]"
+  footer-center: "+✦+"
