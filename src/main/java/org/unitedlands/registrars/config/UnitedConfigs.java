@@ -1,5 +1,7 @@
 package org.unitedlands.registrars.config;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -9,6 +11,7 @@ import org.unitedlands.annotations.UnitedSetting;
 import org.unitedlands.utils.United;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -129,13 +132,17 @@ public class UnitedConfigs {
         }
 
         var setting = method.getAnnotation(UnitedSetting.class);
-        if (setting != null)
-            return resolveValue(
-                    config,
-                    fullKey(prefix, setting.key()), setting.def(),
-                    method.getReturnType(),
-                    method.getGenericReturnType()
-            );
+        if (setting != null) {
+            var key = fullKey(prefix, setting.key());
+
+            if (method.getParameterCount() == 1) {
+                writeValue(config, key, args[0]);
+                save(config);
+                return null;
+            }
+
+            return resolveValue(config, key, setting.def(), method.getReturnType(), method.getGenericReturnType());
+        }
 
         var section = method.getAnnotation(UnitedSection.class);
         if (section != null) {
@@ -157,6 +164,9 @@ public class UnitedConfigs {
 
         if (type.isEnum())
             return resolveEnum(config, key, def, type);
+
+        if (type == Location.class)
+            return resolveLocation(config, key);
 
         return switch (type.getTypeName()) {
 
@@ -190,6 +200,22 @@ public class UnitedConfigs {
             United.logger().warning("Invalid value '" + value + "' for '" + key + "', expected one of: " + type.getSimpleName());
             return null;
         }
+    }
+
+    private static Location resolveLocation(YamlConfiguration config, String key) {
+        var section = config.getConfigurationSection(key);
+        if (section == null)
+            return null;
+
+        var worldName = section.getString("world");
+        var world     = worldName != null ? Bukkit.getWorld(worldName) : null;
+        if (world == null) {
+            United.logger().warning("World '" + worldName + "' for location '" + key + "' is not loaded");
+            return null;
+        }
+
+        return new Location(world, section.getDouble("x"), section.getDouble("y"), section.getDouble("z"),
+                (float) section.getDouble("yaw"), (float) section.getDouble("pitch"));
     }
 
     private static List<?> resolveList(YamlConfiguration config, String key, Type generic) {
@@ -234,6 +260,21 @@ public class UnitedConfigs {
                 return (V) build(valueType, config, prefix + "." + key);
             }
 
+            @Override public void set(String key, V value) {
+                if (value == null) {
+                    remove(key);
+                    return;
+                }
+
+                writeObject(config, prefix + "." + key, value);
+                save(config);
+            }
+
+            @Override public void remove(String key) {
+                config.set(prefix + "." + key, null);
+                save(config);
+            }
+
             @Override public boolean has(String key) {
                 return config.contains(prefix + "." + key);
             }
@@ -271,6 +312,89 @@ public class UnitedConfigs {
 
     private static String fullKey(String prefix, String key) {
         return prefix.isEmpty() ? key : prefix + "." + key;
+    }
+
+    private static void writeObject(YamlConfiguration config, String key, Object value) {
+        var flat = new LinkedHashMap<String, Object>();
+        collect(value, key, flat);
+
+        config.set(key, null);
+        flat.forEach((k, v) -> writeValue(config, k, v));
+    }
+
+    private static void collect(Object value, String prefix, Map<String, Object> out) {
+        try {
+            if (value.getClass().isRecord()) {
+                for (var component : value.getClass().getRecordComponents()) {
+                    var setting = component.getAnnotation(UnitedSetting.class);
+                    var section = component.getAnnotation(UnitedSection.class);
+                    var current = component.getAccessor().invoke(value);
+
+                    if (setting != null)
+                        out.put(fullKey(prefix, setting.key()), current);
+                    else if (section != null && current != null && !(current instanceof UnitedDynamicSection))
+                        collect(current, fullKey(prefix, section.key()), out);
+                }
+                return;
+            }
+
+            for (var type : value.getClass().getInterfaces())
+                for (var method : type.getMethods()) {
+                    if (method.getParameterCount() != 0)
+                        continue;
+
+                    var setting = method.getAnnotation(UnitedSetting.class);
+                    var section = method.getAnnotation(UnitedSection.class);
+
+                    if (setting != null)
+                        out.put(fullKey(prefix, setting.key()), method.invoke(value));
+                    else if (section != null && method.getReturnType() != UnitedDynamicSection.class)
+                        collect(method.invoke(value), fullKey(prefix, section.key()), out);
+                }
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("Could not read " + value.getClass().getSimpleName() + ": " + e.getMessage(), e);
+        }
+    }
+
+    private static void writeValue(YamlConfiguration config, String key, Object value) {
+        switch (value) {
+            case null -> config.set(key, null);
+
+            case Location loc -> {
+                config.set(key, null);
+                config.set(key + ".world", loc.getWorld() != null ? loc.getWorld().getName() : null);
+                config.set(key + ".x", loc.getX());
+                config.set(key + ".y", loc.getY());
+                config.set(key + ".z", loc.getZ());
+                config.set(key + ".yaw", (double) loc.getYaw());
+                config.set(key + ".pitch", (double) loc.getPitch());
+            }
+
+            case Enum<?> e -> config.set(key, e.name().toLowerCase());
+
+            case List<?> list -> config.set(key, list.stream()
+                    .map(element -> element instanceof Enum<?> e ? e.name().toLowerCase() : element)
+                    .toList());
+
+            default -> config.set(key, value);
+        }
+    }
+
+    private static void save(YamlConfiguration config) {
+        for (var entry : entries.entrySet()) {
+            if (entry.getValue().config() != config)
+                continue;
+
+            var fileName = entry.getKey().getAnnotation(UnitedConfig.class).file();
+            var file     = new File(entry.getValue().plugin().getDataFolder(), fileName.isEmpty() ? "config.yml" : fileName);
+
+            try {
+                config.save(file);
+            } catch (IOException e) {
+                United.logger().error("Could not save " + file.getName() + ": " + e.getMessage());
+            }
+            return;
+        }
     }
 
 }
